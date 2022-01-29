@@ -74,7 +74,6 @@ class ITUserRepositoryTest {
         user = userRepository.findById(1L)
                 .orElseThrow(() -> new AssertionError("Такого не должно быть!"));
 
-        log.debug("Updated user: {}", user);
 
         assertThat(user, allOf(
                 hasProperty("id", equalTo(1L)),
