@@ -14,8 +14,11 @@
     <name>MicroService</name>
     <description>MicroService</description>
     <properties>
+        <sonar.organization>volkoedov</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <java.version>17</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
