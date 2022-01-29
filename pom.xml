@@ -18,6 +18,7 @@
     <properties>
         <sonar.organization>volkoedov</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.exclusions>vea.home.microservice.MicroServiceApplication</sonar.coverage.exclusions>
         <java.version>17</java.version>
     </properties>
 
