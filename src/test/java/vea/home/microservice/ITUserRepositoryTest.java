@@ -74,6 +74,8 @@ class ITUserRepositoryTest {
         user = userRepository.findById(1L)
                 .orElseThrow(() -> new AssertionError("Такого не должно быть!"));
 
+        log.debug("Updated user: {}", user);
+
         assertThat(user, allOf(
                 hasProperty("id", equalTo(1L)),
                 hasProperty("firstName", equalTo(firstName)),
@@ -87,7 +89,7 @@ class ITUserRepositoryTest {
     void deleteTest() {
         userRepository.deleteById(1L);
 
-        userRepository.findById(1L).ifPresent(r->fail("Такого быть не должно!"));
+        userRepository.findById(1L).ifPresent(r -> fail("Такого быть не должно!"));
 
     }
 }
