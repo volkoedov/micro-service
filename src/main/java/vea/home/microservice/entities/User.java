@@ -1,8 +1,10 @@
-package vea.home.entities;
+package vea.home.microservice.entities;
 
 import lombok.*;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Builder
@@ -16,6 +18,7 @@ public class User {
 
     @Id
     @ToString.Include
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ToString.Include
