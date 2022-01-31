@@ -9,7 +9,7 @@
     <logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener" level="INFO"/>
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
     <logger name="vea.home.microservice" level="DEBUG"/>
-    <root level="ERROR">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

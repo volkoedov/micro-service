@@ -2,10 +2,7 @@ package vea.home.microservice.entities;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Builder
 @NoArgsConstructor
@@ -14,6 +11,7 @@ import javax.persistence.Id;
 @Getter
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
+@Table(name = "\"USER\"")
 public class User {
 
     @Id
@@ -22,8 +20,10 @@ public class User {
     private Long id;
 
     @ToString.Include
+    @Column(name = "FIRST_NAME")
     private String firstName;
 
     @ToString.Include
+    @Column(name = "LAST_NAME")
     private String lastName;
 }
