@@ -9,7 +9,6 @@ abstract class GenericException extends RuntimeException {
     private final Map<String, Object> details=new HashMap<>();
     private final Integer code;
 
-
     protected GenericException(Integer code,String message, Map<String, Object> details) {
         super(message);
         this.code = code;
