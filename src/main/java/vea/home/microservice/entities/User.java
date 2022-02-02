@@ -3,6 +3,7 @@ package vea.home.microservice.entities;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Builder
 @NoArgsConstructor
@@ -20,10 +21,8 @@ public class User {
     private Long id;
 
     @ToString.Include
-    @Column(name = "FIRST_NAME")
-    private String firstName;
+    private String name;
 
     @ToString.Include
-    @Column(name = "LAST_NAME")
-    private String lastName;
+    private LocalDateTime dateOfBirth;
 }

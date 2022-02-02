@@ -1,4 +1,6 @@
 package vea.home.microservice.services;
 
-public record UserDTO(Long id, String firstName, String lastName) {
+import java.time.LocalDateTime;
+
+public record UserDTO(Long id, String name, LocalDateTime dateOfBirth) {
 }

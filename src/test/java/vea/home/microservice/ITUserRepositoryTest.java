@@ -10,6 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import vea.home.microservice.entities.User;
 import vea.home.microservice.repositories.UserRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -30,8 +33,8 @@ class ITUserRepositoryTest {
     void persistTest() {
 
         User user = User.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
+                .name(FIRST_NAME)
+                .dateOfBirth(LocalDateTime.now())
                 .build();
         User savedUser = userRepository.save(user);
 
@@ -66,8 +69,8 @@ class ITUserRepositoryTest {
         User user = userRepository.findById(1L)
                 .orElseThrow(() -> new AssertionError("Такого не должно быть!"));
 
-        String firstName = "Mikhail";
-        user.setFirstName(firstName);
+        String name = "Mikhail";
+        user.setName(name);
 
         userRepository.save(user);
 
@@ -78,7 +81,7 @@ class ITUserRepositoryTest {
 
         assertThat(user, allOf(
                 hasProperty("id", equalTo(1L)),
-                hasProperty("firstName", equalTo(firstName)),
+                hasProperty("name", equalTo(name)),
                 hasProperty("lastName", equalTo(LAST_NAME))
 
         ));
@@ -87,9 +90,8 @@ class ITUserRepositoryTest {
     @Test
     @Order(4)
     void deleteTest() {
+
         userRepository.deleteById(1L);
-
         userRepository.findById(1L).ifPresent(r -> fail("Такого быть не должно!"));
-
     }
 }
