@@ -2,10 +2,7 @@ package vea.home.microservice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.exparity.hamcrest.date.LocalDateTimeMatchers;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import vea.home.microservice.entities.User;
@@ -21,35 +18,39 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ITUserRepositoryTest {
 
     private static final LocalDateTime DATE_OF_BIRTH = LocalDateTime.now();
-    private static final String FIRST_NAME = "Eugen";
+    private static final String NAME = "Eugen";
 
     @Autowired
     private UserRepository userRepository;
+
+    private Long savedUserId;
 
     @Test
     @Order(1)
     void persistTest() {
 
-        User user = User.builder().name(FIRST_NAME).dateOfBirth(DATE_OF_BIRTH).build();
+        User user = User.builder().name(NAME).dateOfBirth(DATE_OF_BIRTH).build();
         User savedUser = userRepository.save(user);
 
         log.debug("Saved user : {}", savedUser);
 
-        assertThat(savedUser, allOf(hasProperty("id", equalTo(1L)), hasProperty("name", equalTo(FIRST_NAME)), hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
-
+        assertThat(savedUser, allOf(hasProperty("id", notNullValue()), hasProperty("name", equalTo(NAME)), hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
         ));
+
+        savedUserId = savedUser.getId();
     }
 
     @Test
     @Order(2)
     void findTest() {
-        User user = userRepository.findById(1L).orElseThrow(() -> new AssertionError("Такого не должно быть!"));
+        User user = userRepository.findById(savedUserId).orElseThrow(() -> new AssertionError("Такого не должно быть!"));
 
-        assertThat(user, allOf(hasProperty("id", equalTo(1L)),
-                hasProperty("name", equalTo(FIRST_NAME)),
+        assertThat(user, allOf(hasProperty("id", equalTo(savedUserId)),
+                hasProperty("name", equalTo(NAME)),
                 hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
 
         ));
@@ -58,18 +59,18 @@ class ITUserRepositoryTest {
     @Test
     @Order(3)
     void updateTest() {
-        User user = userRepository.findById(1L).orElseThrow(() -> new AssertionError("Такого не должно быть!"));
+        User user = userRepository.findById(savedUserId).orElseThrow(() -> new AssertionError("Такого не должно быть!"));
 
         String name = "Mikhail";
         user.setName(name);
 
         userRepository.save(user);
 
-        user = userRepository.findById(1L).orElseThrow(() -> new AssertionError("Такого не должно быть!"));
+        user = userRepository.findById(savedUserId).orElseThrow(() -> new AssertionError("Такого не должно быть!"));
 
         log.debug("Updated user: {}", user);
 
-        assertThat(user, allOf(hasProperty("id", equalTo(1L)), hasProperty("name", equalTo(name)), hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
+        assertThat(user, allOf(hasProperty("id", equalTo(savedUserId)), hasProperty("name", equalTo(name)), hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
 
         ));
     }
@@ -78,7 +79,7 @@ class ITUserRepositoryTest {
     @Order(4)
     void deleteTest() {
 
-        userRepository.deleteById(1L);
-        userRepository.findById(1L).ifPresent(r -> fail("Такого быть не должно!"));
+        userRepository.deleteById(savedUserId);
+        userRepository.findById(savedUserId).ifPresent(r -> fail("Такого быть не должно!"));
     }
 }
