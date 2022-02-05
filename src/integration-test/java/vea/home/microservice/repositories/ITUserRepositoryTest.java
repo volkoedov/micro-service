@@ -1,4 +1,4 @@
-package vea.home.microservice;
+package vea.home.microservice.repositories;
 
 import lombok.extern.slf4j.Slf4j;
 import org.exparity.hamcrest.date.LocalDateTimeMatchers;
