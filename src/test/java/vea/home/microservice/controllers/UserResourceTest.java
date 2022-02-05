@@ -200,9 +200,8 @@ class UserResourceTest {
         when(postRepository.findByUserId(USER_ID)).thenReturn(posts);
         mockMvc.perform(get("/users/{userId}/posts",USER_ID))
                 .andExpect(status().isOk())
-
-                .andExpect(jsonPath("[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", firstPost.getId(), firstPost.getMessage(), firstPost.getVersion()).exists())
-                .andExpect(jsonPath("[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", secondPost.getId(), secondPost.getMessage(), secondPost.getVersion()).exists())
+                .andExpect(jsonPath("$.[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", firstPost.getId(), firstPost.getMessage(), firstPost.getVersion()).exists())
+                .andExpect(jsonPath("$.[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", secondPost.getId(), secondPost.getMessage(), secondPost.getVersion()).exists())
                 .andExpect(jsonPath("$.length()").value(equalTo(2)));
     }
 }
