@@ -29,7 +29,9 @@ public class UserResource {
 
     @GetMapping("/users/{id}")
     public UserDTO retrieveUser(@PathVariable Long id) {
-        return userRepository.findById(id).map(e -> new UserDTO(e.getId(), e.getVersion(), e.getName(), e.getDateOfBirth())).orElseThrow(() -> new UserNotFoundException(id));
+        return userRepository.findById(id)
+                .map(e -> new UserDTO(e.getId(), e.getVersion(), e.getName(), e.getDateOfBirth()))
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @GetMapping("/users")
@@ -74,7 +76,8 @@ public class UserResource {
     @PostMapping("/users/{id}/posts")
     public ResponseEntity<PostDTO> newPost(@PathVariable(name = "id") Long userId, @RequestBody PostDTO newPost) {
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         Post post = Post.builder()
                 .message(newPost.getMessage())
