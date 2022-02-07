@@ -13,6 +13,7 @@ import vea.home.microservice.repositories.UserRepository;
 import vea.home.microservice.services.PostDTO;
 import vea.home.microservice.services.UserDTO;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class UserResource {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<UserDTO> newUser(@RequestBody UserDTO newUser) {
+    public ResponseEntity<UserDTO> newUser(@Valid @RequestBody UserDTO newUser) {
         User user = User.builder()
                 .name(newUser.getName())
                 .dateOfBirth(newUser.getDateOfBirth())

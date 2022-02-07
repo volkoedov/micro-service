@@ -115,6 +115,18 @@ class UserResourceTest {
     }
 
     @Test
+    void fetchUserNotFoundTest() throws Exception {
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+
+        mockMvc.perform(get("/users/{id}", USER_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("404"));
+
+    }
+
+    @Test
     void newPostTest() throws Exception {
         String message = "Hello world";
 
@@ -177,6 +189,17 @@ class UserResourceTest {
                 .andExpect(jsonPath("$.id").value(POST_ID))
                 .andExpect(jsonPath("$.message").value(message))
                 .andExpect(jsonPath("$.version").value(0))
+        ;
+    }
+
+    @Test
+    void fetchPostNotFoundTest() throws Exception {
+
+        when(postRepository.findByIdAndUserId(POST_ID,USER_ID)).thenReturn(Optional.empty());
+        mockMvc.perform(get("/users/{userId}/posts/{postId}",USER_ID,POST_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("404"))
+
         ;
     }
 
