@@ -19,8 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -122,7 +121,9 @@ class UserResourceTest {
 
         mockMvc.perform(get("/users/{id}", USER_ID))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorCode").value("404"));
+                .andExpect(jsonPath("$.errorCode").value("404"))
+                .andExpect(jsonPath("$.details.[?(@.id=='%s')]", USER_ID).exists())
+        ;
 
     }
 
@@ -195,14 +196,26 @@ class UserResourceTest {
     @Test
     void fetchPostNotFoundTest() throws Exception {
 
-        when(postRepository.findByIdAndUserId(POST_ID,USER_ID)).thenReturn(Optional.empty());
-        mockMvc.perform(get("/users/{userId}/posts/{postId}",USER_ID,POST_ID))
+        when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("404"))
+                .andExpect(jsonPath("$.details.[?(@.postId=='%s')]", POST_ID).exists())
+                .andExpect(jsonPath("$.details.[?(@.userId=='%s')]", USER_ID).exists())
 
         ;
     }
 
+    @Test
+    void unexpectedServerErrorTest() throws Exception {
+
+        when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenThrow(new RuntimeException("Unexpected Exception"));
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorCode").value("500"))
+                .andExpect(jsonPath("$.details", POST_ID).value(nullValue()))
+        ;
+    }
     @Test
     void retrieveAllPosts() throws Exception {
         Set<Post> posts=new HashSet<>();
