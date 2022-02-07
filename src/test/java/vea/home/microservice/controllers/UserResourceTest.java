@@ -161,6 +161,26 @@ class UserResourceTest {
     }
 
     @Test
+    void newPostUserNotFoundTest() throws Exception {
+        String message = "Hello world";
+
+        PostDTO post = PostDTO.builder()
+                .message(message)
+                .build();
+
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+
+        mockMvc.perform(post("/users/{userId}/posts", USER_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(post))
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.details.[?(@.id=='%s')]", USER_ID).exists())
+                .andExpect(jsonPath("$.errorCode").value("404"));
+    }
+
+    @Test
     void deleteUserTest() throws Exception {
         mockMvc.perform(delete("/users/{userId}",USER_ID))
                 .andExpect(status().isNoContent());
