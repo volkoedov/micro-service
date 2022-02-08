@@ -2,10 +2,9 @@ package vea.home.microservice.entities;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @Builder
 @NoArgsConstructor
@@ -14,6 +13,7 @@ import javax.persistence.Id;
 @Getter
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
+@Table(name = "\"USER\"")
 public class User {
 
     @Id
@@ -21,9 +21,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
     @ToString.Include
-    private String firstName;
+    private Long version;
 
     @ToString.Include
-    private String lastName;
+    private String name;
+
+    @ToString.Include
+    private LocalDateTime dateOfBirth;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    private Set<Post> posts;
+
 }
