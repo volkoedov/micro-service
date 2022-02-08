@@ -32,6 +32,7 @@ class UserResourceTest {
     private static final Long POST_ID = 1L;
     private static final String NAME = "Eugen";
     private static final Long USER_ID = 1L;
+
     @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
     private UserRepository userRepository;
 
