@@ -4,129 +4,185 @@ import org.exparity.hamcrest.date.LocalDateTimeMatchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.*;
 import vea.home.microservice.services.PostDTO;
 import vea.home.microservice.services.UserDTO;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("IT User Resource")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ITUserResourceTest {
-    public static final LocalDateTime DATE_OF_BIRTH = LocalDateTime.now();
-    public static final String NAME = "Eugen";
+
+    public static final String MESSAGE = "Hello world";
+    private static final String NAME = "Eugen";
+    private static final LocalDateTime DATE_OF_BIRTH = LocalDateTime.now();
+
+    @LocalServerPort
+    private int port;
+
     @Autowired
-    private UserResource resource;
+    private TestRestTemplate restTemplate;
+    private Long userId;
+    private Long postId;
 
-    private Long savedUserId;
-    private Long savedPostId;
-
+    @DisplayName("Create new user")
     @Test
     @Order(1)
     void createUserTest() {
-        UserDTO user = new UserDTO(null,null, NAME, DATE_OF_BIRTH);
-        ResponseEntity<UserDTO> result = resource.newUser(user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
 
-        assertThat(result, allOf(
-                hasProperty("statusCode", equalTo(HttpStatus.CREATED)),
-                hasProperty("body", notNullValue()),
+        UserDTO user = UserDTO.builder()
+                .dateOfBirth(DATE_OF_BIRTH)
+                .name(NAME)
+                .build();
+        HttpEntity<UserDTO> request = new HttpEntity<>(user, headers);
+
+        ResponseEntity<UserDTO> response = restTemplate.postForEntity(URI.create("http://localhost:" + port + "/users"), request, UserDTO.class);
+
+        assertThat(response, allOf(
+                hasProperty("statusCode", is(HttpStatus.CREATED)),
                 hasProperty("body", allOf(
-                                hasProperty("id", notNullValue()),
-                                hasProperty("name", is(NAME)),
-                                hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
+                        hasProperty("id", notNullValue()),
+                        hasProperty("name", equalTo(NAME)),
+                        hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
+                ))
+        ));
 
-                        )
-
-                )));
-
-        savedUserId = Optional.ofNullable(result.getBody())
-                .map(UserDTO::getId)
-                .orElseThrow(() -> new AssertionError("Такого быть не должно!"));
-
+        userId = Optional.ofNullable(response.getBody())
+                .map(UserDTO::getId).orElseThrow();
     }
 
+    @DisplayName("Fetch user by userId")
     @Test
     @Order(2)
-    void retrieveAllUsersTest() {
-        List<UserDTO> users = resource.retrieveAllUsers();
+    void fetchUserTest() {
 
-        assertThat(users, allOf(
-                notNullValue(),
-                hasItem(hasProperty("id", equalTo(savedUserId)))
+        ResponseEntity<UserDTO> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/" + userId), UserDTO.class);
+
+        assertThat(response, allOf(
+                hasProperty("statusCode", is(HttpStatus.OK)),
+                hasProperty("body", allOf(
+                        hasProperty("id", notNullValue()),
+                        hasProperty("name", equalTo(NAME)),
+                        hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
+                ))
         ));
-
     }
 
-
+    @DisplayName("Fetch all users")
     @Test
     @Order(3)
-    void retrieveUserTest() {
-        UserDTO user = resource.retrieveUser(savedUserId);
+    void fetchAllUsersTest() {
 
-        assertThat(user, allOf(
-                notNullValue(),
-                hasProperty("id", equalTo(savedUserId)),
-                hasProperty("name", equalTo(NAME)),
-                hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
+        ResponseEntity<UserDTO[]> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/"), UserDTO[].class);
+
+        assertThat(response, allOf(
+                hasProperty("statusCode", equalTo(HttpStatus.OK)),
+                hasProperty("body",
+                        allOf(
+                                arrayWithSize(equalTo(1)),
+                                hasItemInArray(allOf(
+                                        hasProperty("id", notNullValue()),
+                                        hasProperty("name", equalTo(NAME)),
+                                        hasProperty("dateOfBirth", LocalDateTimeMatchers.within(1, ChronoUnit.MILLIS, DATE_OF_BIRTH))
+                                ))
+                        ))
         ));
-
     }
 
+    @DisplayName("Create new post")
     @Test
     @Order(4)
-    void createPostTest() {
-        String message = "Hello world!";
+    void addPostTest() {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+
         PostDTO post = PostDTO.builder()
-                .message(message)
+                .message(MESSAGE)
                 .build();
-        ResponseEntity<PostDTO> result = resource.newPost(savedUserId, post);
+        HttpEntity<PostDTO> request = new HttpEntity<>(post, headers);
+        ResponseEntity<PostDTO> response = restTemplate.postForEntity(URI.create("http://localhost:" + port + "/users/" + userId + "/posts"), request, PostDTO.class);
 
-        assertThat(result, allOf(
+        assertThat(response, allOf(
                 hasProperty("statusCode", equalTo(HttpStatus.CREATED)),
-                hasProperty("body", notNullValue()),
-                hasProperty("body", allOf(
+                hasProperty("body",
+                        allOf(
                                 hasProperty("id", notNullValue()),
-                                hasProperty("message", is(message))
-
-                        )
-                )
+                                hasProperty("message", equalTo(MESSAGE)),
+                                hasProperty("version", equalTo(0L))
+                        ))
         ));
-        savedPostId = Optional.ofNullable(result.getBody())
+
+        postId = Optional.ofNullable(response.getBody())
                 .map(PostDTO::getId)
-                .orElseThrow(() -> new AssertionError("Такого быть не должно"));
+                .orElseThrow();
     }
 
+    @DisplayName("Fetch post by Id")
     @Test
     @Order(5)
-    void retrievePostTest() {
-        PostDTO post = resource.retrievePost(savedUserId, savedPostId);
-        assertThat(post, allOf(
-                        hasProperty("id", equalTo(savedPostId)),
-                        hasProperty("message", is(equalTo("Hello world!")))
-                )
-        );
+    void fetchPostTest() {
+        ResponseEntity<PostDTO> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/" + userId + "/posts/" + postId), PostDTO.class);
+        assertThat(response, allOf(
+                hasProperty("statusCode", is(HttpStatus.OK)),
+                hasProperty("body", allOf(
+                        hasProperty("id", notNullValue()),
+                        hasProperty("version", equalTo(0L)),
+                        hasProperty("message", equalTo(MESSAGE))
+                ))
+        ));
     }
 
+    @DisplayName("Fetch all posts")
     @Test
     @Order(6)
-    void retrieveAllPostsTest() {
-        List<PostDTO> posts = resource.retrieveAllPosts(savedUserId);
-        assertThat(posts, allOf(
-                iterableWithSize(1),
-                hasItem(allOf(
-                        hasProperty("id", equalTo(savedPostId)),
-                        hasProperty("message", is(equalTo("Hello world!")))
-                        )
+    void fetchAllPostTest() {
+        ResponseEntity<PostDTO[]> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/" + userId + "/posts/"), PostDTO[].class);
+        assertThat(response, allOf(
+                hasProperty("statusCode", is(HttpStatus.OK)),
+                hasProperty("body", allOf(
+                        arrayWithSize(equalTo(1)),
+                        hasItemInArray(allOf(
+                                hasProperty("id", notNullValue()),
+                                hasProperty("version", equalTo(0L)),
+                                hasProperty("message", equalTo(MESSAGE))
+                        ))
                 ))
-        );
+        ));
     }
+
+    @DisplayName("Delete all users and posts")
+    @Test
+    @Order(7)
+    void deleteUserTest() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+
+
+        HttpEntity<Object> request = new HttpEntity<>(null, headers);
+        ResponseEntity<Object> response = restTemplate.exchange(URI.create("http://localhost:" + port + "/users/" + userId), HttpMethod.DELETE, request, Object.class);
+
+        assertThat(response, allOf(
+                        hasProperty("statusCode", is(HttpStatus.NO_CONTENT)),
+                        hasProperty("body", nullValue())
+                )
+        );
+
+
+    }
+
 
 }

@@ -21,7 +21,7 @@ import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -184,6 +184,7 @@ class UserResourceTest {
     void deleteUserTest() throws Exception {
         mockMvc.perform(delete("/users/{userId}",USER_ID))
                 .andExpect(status().isNoContent());
+        verify(userRepository, times(1)).deleteById(USER_ID);
     }
 
     @Test
