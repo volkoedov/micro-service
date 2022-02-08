@@ -122,6 +122,11 @@
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <version>1.7.4</version>
+                <configuration>
+                    <excludedTestClasses>
+                        <param>**.IT*</param>
+                    </excludedTestClasses>
+                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.pitest</groupId>
