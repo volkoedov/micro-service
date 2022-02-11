@@ -46,7 +46,7 @@ class UserResourceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void addUserTest() throws Exception {
+    void createUserTest() throws Exception {
 
         when(userRepository.save(any())).thenReturn(User.builder()
                 .id(USER_ID)
@@ -63,6 +63,7 @@ class UserResourceTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(USER_ID))
                 .andExpect(jsonPath("$.name").value(NAME))
+                .andExpect(jsonPath("$._links.all-users.href").value("http://localhost/users"))
                 .andExpect(jsonPath("$.dateOfBirth").value(containsString(DATE_OF_BIRTH.format(DateTimeFormatter.ISO_DATE_TIME))));
     }
 
@@ -256,10 +257,24 @@ class UserResourceTest {
         posts.add(secondPost);
 
         when(postRepository.findByUserId(USER_ID)).thenReturn(posts);
-        mockMvc.perform(get("/users/{userId}/posts",USER_ID))
+        mockMvc.perform(get("/users/{userId}/posts", USER_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", firstPost.getId(), firstPost.getMessage(), firstPost.getVersion()).exists())
                 .andExpect(jsonPath("$.[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", secondPost.getId(), secondPost.getMessage(), secondPost.getVersion()).exists())
                 .andExpect(jsonPath("$.length()").value(equalTo(2)));
+    }
+
+    @Test
+    void createUserWithWrongName() throws Exception {
+        String tooShortName = "1";
+        UserDTO user = new UserDTO(null, null, tooShortName, DATE_OF_BIRTH);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[?(@.name=='%s')]", "size must be between 2 and 2147483647").exists())
+                .andExpect(jsonPath("$.message").value("Validation error"));
     }
 }

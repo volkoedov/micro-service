@@ -1,5 +1,7 @@
 package vea.home.microservice.controllers;
 
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +59,7 @@ public class UserResource {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<UserDTO> newUser(@Valid @RequestBody UserDTO newUser) {
+    public ResponseEntity<EntityModel<UserDTO>> createUser(@Valid @RequestBody UserDTO newUser) {
         User user = User.builder()
                 .name(newUser.getName())
                 .dateOfBirth(newUser.getDateOfBirth())
@@ -71,7 +73,12 @@ public class UserResource {
                 .toUri();
 
         UserDTO userForResponse = new UserDTO(savedUser.getId(), savedUser.getVersion(), savedUser.getName(), savedUser.getDateOfBirth());
-        return ResponseEntity.created(location).body(userForResponse);
+        EntityModel<UserDTO> model = EntityModel.of(userForResponse);
+
+        WebMvcLinkBuilder linkToUsers = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).retrieveAllUsers());
+        model.add(linkToUsers.withRel("all-users"));
+
+        return ResponseEntity.created(location).body(model);
     }
 
     @PostMapping("/users/{id}/posts")
