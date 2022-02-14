@@ -23,9 +23,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 class UserResourceTest {
@@ -113,6 +111,24 @@ class UserResourceTest {
                 .andExpect(jsonPath("$.id").value(USER_ID))
                 .andExpect(jsonPath("$.name").value(NAME))
                 .andExpect(jsonPath("$.dateOfBirth").value(containsString(DATE_OF_BIRTH.format(DateTimeFormatter.ISO_DATE_TIME))));
+
+    }
+
+    @Test
+    void fetchUserXmlTest() throws Exception {
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(User.builder()
+                .id(USER_ID)
+                .name(NAME)
+                .dateOfBirth(DATE_OF_BIRTH)
+                .build()));
+
+
+        mockMvc.perform(get("/users/{id}", USER_ID).header("accept", "application/xml"))
+                .andExpect(status().isOk())
+                .andExpect(xpath("UserDTO/id").string(USER_ID.toString()))
+                .andExpect(xpath("UserDTO/name").string(NAME))
+                .andExpect(xpath("UserDTO/dateOfBirth").string(containsString(DATE_OF_BIRTH.format(DateTimeFormatter.ISO_DATE_TIME))));
 
     }
 
@@ -205,7 +221,7 @@ class UserResourceTest {
 
     @Test
     void deleteUserTest() throws Exception {
-        mockMvc.perform(delete("/users/{userId}",USER_ID))
+        mockMvc.perform(delete("/users/{userId}", USER_ID))
                 .andExpect(status().isNoContent());
         verify(userRepository, times(1)).deleteById(USER_ID);
     }
@@ -228,8 +244,8 @@ class UserResourceTest {
                 .version(0L)
                 .build();
 
-        when(postRepository.findByIdAndUserId(POST_ID,USER_ID)).thenReturn(Optional.of(post));
-        mockMvc.perform(get("/users/{userId}/posts/{postId}",USER_ID,POST_ID))
+        when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.of(post));
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(POST_ID))
                 .andExpect(jsonPath("$.message").value(message))
@@ -260,7 +276,7 @@ class UserResourceTest {
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
         mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID)
                         .header("Accept-Language", "ru")
-                        .header("content-type","application/json","charset=utf-8")
+                        .header("content-type", "application/json", "charset=utf-8")
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("1002"))
@@ -281,9 +297,10 @@ class UserResourceTest {
                 .andExpect(jsonPath("$.details", POST_ID).value(nullValue()))
         ;
     }
+
     @Test
     void retrieveAllPosts() throws Exception {
-        Set<Post> posts=new HashSet<>();
+        Set<Post> posts = new HashSet<>();
         Post firstPost = Post.builder()
                 .id(1L)
                 .message("First Post")
@@ -291,7 +308,7 @@ class UserResourceTest {
                 .build();
         posts.add(firstPost);
 
-        Post secondPost= Post.builder()
+        Post secondPost = Post.builder()
                 .id(2L)
                 .message("Second post")
                 .version(10L)
