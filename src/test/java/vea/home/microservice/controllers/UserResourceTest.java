@@ -259,7 +259,9 @@ class UserResourceTest {
         String errorMessage = String.format("Сообщение c id = %s для пользователя с Id = %s не найденно", POST_ID, USER_ID);
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
         mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID)
-                        .header("Accept-Language", "ru"))
+                        .header("Accept-Language", "ru")
+                        .header("content-type","application/json","charset=utf-8")
+                )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("1002"))
                 .andExpect(jsonPath("$.message").value(errorMessage))

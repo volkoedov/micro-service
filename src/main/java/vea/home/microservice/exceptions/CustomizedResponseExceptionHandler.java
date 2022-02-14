@@ -3,6 +3,7 @@ package vea.home.microservice.exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 
 @ControllerAdvice(annotations = {RestController.class})
@@ -27,6 +30,7 @@ class CustomizedResponseExceptionHandler extends ResponseEntityExceptionHandler 
     CustomizedResponseExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
+
 
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) {
