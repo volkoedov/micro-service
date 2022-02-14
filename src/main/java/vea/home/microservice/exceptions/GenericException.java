@@ -7,12 +7,11 @@ import java.util.Map;
 
 abstract class GenericException extends RuntimeException {
     private final Map<String, Object> details=new HashMap<>();
-    private final Integer code;
+    private final String code;
 
 
 
-    protected GenericException(int code, String message) {
-        super(message);
+    protected GenericException(String code) {
         this.code = code;
     }
 
@@ -23,7 +22,7 @@ abstract class GenericException extends RuntimeException {
         return Collections.unmodifiableMap(details);
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 }

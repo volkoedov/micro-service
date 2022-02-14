@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -121,9 +122,27 @@ class UserResourceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
 
+        String errorMessage = String.format("User with id = %s not found", USER_ID);
         mockMvc.perform(get("/users/{id}", USER_ID))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorCode").value("404"))
+                .andExpect(jsonPath("$.errorCode").value("1001"))
+                .andExpect(jsonPath("$.message").value(errorMessage))
+                .andExpect(jsonPath("$.details.[?(@.id=='%s')]", USER_ID).exists())
+        ;
+
+    }
+
+    @Test
+    void fetchUserNotFoundRussianLocaleTest() throws Exception {
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+
+        String errorMessage = String.format("Пользователь c id = %s не найден", USER_ID);
+        mockMvc.perform(get("/users/{id}", USER_ID).header("Accept-Language", "ru"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("1001"))
+                .andExpect(jsonPath("$.message").value(errorMessage))
                 .andExpect(jsonPath("$.details.[?(@.id=='%s')]", USER_ID).exists())
         ;
 
@@ -172,6 +191,7 @@ class UserResourceTest {
 
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
+        String errorMessage = String.format("User with id = %s not found", USER_ID);
 
         mockMvc.perform(post("/users/{userId}/posts", USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -179,7 +199,8 @@ class UserResourceTest {
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.details.[?(@.id=='%s')]", USER_ID).exists())
-                .andExpect(jsonPath("$.errorCode").value("404"));
+                .andExpect(jsonPath("$.errorCode").value("1001"))
+                .andExpect(jsonPath("$.message").value(errorMessage));
     }
 
     @Test
@@ -219,10 +240,29 @@ class UserResourceTest {
     @Test
     void fetchPostNotFoundTest() throws Exception {
 
+        String errorMessage = String.format("Post with id = %s for user with id = %s not found", POST_ID, USER_ID);
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
         mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errorCode").value("404"))
+                .andExpect(jsonPath("$.errorCode").value("1002"))
+                .andExpect(jsonPath("$.message").value(errorMessage))
+                .andExpect(jsonPath("$.details.[?(@.postId=='%s')]", POST_ID).exists())
+                .andExpect(jsonPath("$.details.[?(@.userId=='%s')]", USER_ID).exists())
+
+        ;
+    }
+
+
+    @Test
+    void fetchPostNotFoundRussianLocaleTest() throws Exception {
+
+        String errorMessage = String.format("Сообщение c id = %s для пользователя с Id = %s не найденно", POST_ID, USER_ID);
+        when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID)
+                        .header("Accept-Language", "ru"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("1002"))
+                .andExpect(jsonPath("$.message").value(errorMessage))
                 .andExpect(jsonPath("$.details.[?(@.postId=='%s')]", POST_ID).exists())
                 .andExpect(jsonPath("$.details.[?(@.userId=='%s')]", USER_ID).exists())
 
@@ -235,7 +275,7 @@ class UserResourceTest {
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenThrow(new RuntimeException("Unexpected Exception"));
         mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.errorCode").value("500"))
+                .andExpect(jsonPath("$.errorCode").value("server.error"))
                 .andExpect(jsonPath("$.details", POST_ID).value(nullValue()))
         ;
     }
