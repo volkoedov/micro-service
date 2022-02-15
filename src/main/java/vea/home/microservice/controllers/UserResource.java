@@ -83,7 +83,7 @@ public class UserResource {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class)),
                     @Content(mediaType = "application/xml", schema = @Schema(implementation = ExceptionResponse.class))})
     })
-    @PostMapping(value = "/users", consumes = {"appliation/json"})
+    @PostMapping(value = "/users", consumes = {"application/json"})
     public ResponseEntity<EntityModel<UserDTO>> createUser(@Valid @RequestBody UserDTO newUser) {
         User user = User.builder()
                 .name(newUser.getName())
