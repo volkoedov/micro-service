@@ -1,5 +1,10 @@
 package vea.home.microservice.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -8,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import vea.home.microservice.entities.Post;
 import vea.home.microservice.entities.User;
+import vea.home.microservice.exceptions.ExceptionResponse;
 import vea.home.microservice.exceptions.PostNotFoundException;
 import vea.home.microservice.exceptions.UserNotFoundException;
 import vea.home.microservice.repositories.PostRepository;
@@ -29,7 +35,10 @@ public class UserResource {
         this.postRepository = postRepository;
     }
 
-
+    @Operation(summary = "Retrieve user by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class)))
+    })
     @GetMapping("/users/{id}")
     public UserDTO retrieveUser(@PathVariable Long id) {
         return userRepository.findById(id)
@@ -58,7 +67,23 @@ public class UserResource {
                 .toList();
     }
 
-    @PostMapping("/users")
+    @Operation(summary = "Create user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Success", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class)),
+                    @Content(mediaType = "application/xml", schema = @Schema(implementation = UserDTO.class))
+            }),
+
+            @ApiResponse(responseCode = "400", description = "Validation errors", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class)),
+                    @Content(mediaType = "application/xml", schema = @Schema(implementation = ExceptionResponse.class))
+
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal server errors", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class)),
+                    @Content(mediaType = "application/xml", schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @PostMapping(value = "/users", consumes = {"appliation/json"})
     public ResponseEntity<EntityModel<UserDTO>> createUser(@Valid @RequestBody UserDTO newUser) {
         User user = User.builder()
                 .name(newUser.getName())
@@ -112,6 +137,12 @@ public class UserResource {
     public ResponseEntity<Object> deleteUser(@PathVariable Long userId) {
         userRepository.deleteById(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * Класс-workaround для генерации документации OpenAPI
+     */
+    private static class UserResponse extends EntityModel<UserDTO> {
     }
 
 }

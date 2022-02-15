@@ -4,6 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 
-record ExceptionResponse(LocalDateTime timestamp, Map<String, Object> details,
+public record ExceptionResponse(LocalDateTime timestamp, Map<String, Object> details,
                          String message, String errorCode, String requestInfo) {
 }
