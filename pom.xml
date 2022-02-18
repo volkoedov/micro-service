@@ -20,7 +20,8 @@
         <jacoco.version>0.8.7</jacoco.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>java</sonar.language>
 
         <sonar.organization>volkoedov</sonar.organization>
@@ -88,6 +89,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-rest-hal-explorer</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
@@ -151,7 +157,7 @@
             </resource>
         </resources>
         <plugins>
-        <!-- Mutation testing config -->
+            <!-- Mutation testing config -->
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
@@ -169,7 +175,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-        <!-- Code coverage config -->
+            <!-- Code coverage config -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -215,7 +221,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-        <!-- Integration test config           -->
+            <!-- Integration test config           -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

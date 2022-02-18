@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class  UserDTO {
+public class UserDTO {
     Long id;
     Long version;
 

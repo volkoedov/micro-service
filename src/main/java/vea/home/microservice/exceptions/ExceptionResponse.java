@@ -5,5 +5,5 @@ import java.util.Map;
 
 
 public record ExceptionResponse(LocalDateTime timestamp, Map<String, Object> details,
-                         String message, String errorCode, String requestInfo) {
+                                String message, String errorCode, String requestInfo) {
 }

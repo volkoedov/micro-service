@@ -36,7 +36,7 @@ class CustomizedResponseExceptionHandler extends ResponseEntityExceptionHandler 
     public final ResponseEntity<ExceptionResponse> handleAllException(Exception ex, WebRequest request) {
         log.error("Unexpected exception", ex);
         ExceptionResponse response = new ExceptionResponse(LocalDateTime.now(), null, "Server error", "server.error", request.getDescription(false));
-        return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(response);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
     @ExceptionHandler(UserNotFoundException.class)

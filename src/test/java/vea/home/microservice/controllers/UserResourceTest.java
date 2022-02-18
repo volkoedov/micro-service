@@ -12,8 +12,7 @@ import vea.home.microservice.entities.Post;
 import vea.home.microservice.entities.User;
 import vea.home.microservice.repositories.PostRepository;
 import vea.home.microservice.repositories.UserRepository;
-import vea.home.microservice.services.PostDTO;
-import vea.home.microservice.services.UserDTO;
+import vea.home.microservice.services.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,10 +22,9 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebMvcTest(controllers = {UserResource.class, UserMapperImpl.class, PostMapperImpl.class})
 class UserResourceTest {
     private static final LocalDateTime DATE_OF_BIRTH = LocalDateTime.now();
     private static final Long POST_ID = 1L;
