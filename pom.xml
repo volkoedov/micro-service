@@ -198,6 +198,7 @@
                 <configuration>
                     <excludes>
                         <exclude>vea/home/microservice/MicroServiceApplication.class</exclude>
+                        <exclude>vea/home/microservice/mappers/*</exclude>
                     </excludes>
                 </configuration>
                 <dependencies>

@@ -1,10 +1,11 @@
-package vea.home.microservice.services;
+package vea.home.microservice.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueMappingStrategy;
 import vea.home.microservice.entities.Post;
 import vea.home.microservice.entities.User;
+import vea.home.microservice.services.PostDTO;
 
 @Mapper(componentModel = "spring", nullValueMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
 public interface PostMapper {

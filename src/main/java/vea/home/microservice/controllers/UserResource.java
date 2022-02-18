@@ -19,9 +19,9 @@ import vea.home.microservice.exceptions.UserNotFoundException;
 import vea.home.microservice.repositories.PostRepository;
 import vea.home.microservice.repositories.UserRepository;
 import vea.home.microservice.services.PostDTO;
-import vea.home.microservice.services.PostMapper;
+import vea.home.microservice.mappers.PostMapper;
 import vea.home.microservice.services.UserDTO;
-import vea.home.microservice.services.UserMapper;
+import vea.home.microservice.mappers.UserMapper;
 
 import javax.validation.Valid;
 import java.net.URI;

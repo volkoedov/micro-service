@@ -10,9 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import vea.home.microservice.entities.Post;
 import vea.home.microservice.entities.User;
+import vea.home.microservice.mappers.PostMapper;
+import vea.home.microservice.mappers.UserMapper;
 import vea.home.microservice.repositories.PostRepository;
 import vea.home.microservice.repositories.UserRepository;
-import vea.home.microservice.services.*;
+import vea.home.microservice.services.PostDTO;
+import vea.home.microservice.services.UserDTO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +27,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = {UserResource.class, UserMapperImpl.class, PostMapperImpl.class})
+@WebMvcTest(controllers = {UserResource.class, UserMapper.class, PostMapper.class})
 class UserResourceTest {
     private static final LocalDateTime DATE_OF_BIRTH = LocalDateTime.now();
     private static final Long POST_ID = 1L;
