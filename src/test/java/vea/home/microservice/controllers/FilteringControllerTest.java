@@ -30,9 +30,9 @@ class FilteringControllerTest {
 
         mockMvc.perform(get("/filtering-list"))
                 .andDo(print())
-                .andExpect(jsonPath("[?(@.field1=='%s' && @.field2=='%s')]", "value1", "value2").exists())
+                .andExpect(jsonPath("[?(@.field2=='%s' && @.field3=='%s')]", "value2", "value3").exists())
                 .andExpect(jsonPath("[?(@.field1=='%s' && @.field2=='%s' && @.field3=='%s')]", "value1", "value2", "value3").doesNotExist())
-                .andExpect(jsonPath("[?(@.field1=='%s' && @.field2=='%s')]", "value12", "value22").exists())
+                .andExpect(jsonPath("[?(@.field2=='%s' && @.field3=='%s')]", "value22", "value32").exists())
                 .andExpect(jsonPath("[?(@.field1=='%s' && @.field2=='%s' && @.field3=='%s')]", "value12", "value22", "value32").doesNotExist());
 
     }
