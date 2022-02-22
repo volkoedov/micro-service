@@ -6,7 +6,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import vea.home.microservice.entities.User;
-import vea.home.microservice.repositories.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
