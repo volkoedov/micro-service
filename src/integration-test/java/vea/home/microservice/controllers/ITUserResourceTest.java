@@ -1,6 +1,5 @@
 package vea.home.microservice.controllers;
 
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.exparity.hamcrest.date.LocalDateTimeMatchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import vea.home.microservice.entities.User;
 import vea.home.microservice.services.PostDTO;
 import vea.home.microservice.services.UserDTO;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
