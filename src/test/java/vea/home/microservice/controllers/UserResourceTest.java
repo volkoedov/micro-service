@@ -24,8 +24,11 @@ import java.util.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(controllers = {UserResource.class, UserMapper.class, PostMapper.class})
 class UserResourceTest {
@@ -57,7 +60,7 @@ class UserResourceTest {
 
         UserDTO user = new UserDTO(null, null, NAME, DATE_OF_BIRTH);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/users").with(httpBasic("testUser","testUserPassword"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
                 )
@@ -91,7 +94,7 @@ class UserResourceTest {
 
         when(userRepository.findAll()).thenReturn(users);
 
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get("/users").with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("[?(@['id']=='%s' && @['name']=='%s' && @['dateOfBirth']=='%s'&& @['version']=='0')]", USER_ID, NAME, DATE_OF_BIRTH.format(DateTimeFormatter.ISO_DATE_TIME)).exists())
                 .andExpect(jsonPath("[?(@['id']=='%s' && @['name']=='%s' && @['dateOfBirth']=='%s'&& @['version']=='0')]", 2, otherUserName, otherUserDateOfBirth.format(DateTimeFormatter.ISO_DATE_TIME)).exists())
@@ -108,7 +111,7 @@ class UserResourceTest {
                 .build()));
 
 
-        mockMvc.perform(get("/users/{id}", USER_ID))
+        mockMvc.perform(get("/users/{id}", USER_ID).with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(USER_ID))
                 .andExpect(jsonPath("$.name").value(NAME))
@@ -126,7 +129,8 @@ class UserResourceTest {
                 .build()));
 
 
-        mockMvc.perform(get("/users/{id}", USER_ID).header("accept", "application/xml"))
+        mockMvc.perform(get("/users/{id}", USER_ID).header("accept", "application/xml")
+                        .with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isOk())
                 .andExpect(xpath("UserDTO/id").string(USER_ID.toString()))
                 .andExpect(xpath("UserDTO/name").string(NAME))
@@ -141,7 +145,7 @@ class UserResourceTest {
 
 
         String errorMessage = String.format("User with id = %s not found", USER_ID);
-        mockMvc.perform(get("/users/{id}", USER_ID))
+        mockMvc.perform(get("/users/{id}", USER_ID).with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("1001"))
                 .andExpect(jsonPath("$.message").value(errorMessage))
@@ -157,7 +161,7 @@ class UserResourceTest {
 
 
         String errorMessage = String.format("Пользователь c id = %s не найден", USER_ID);
-        mockMvc.perform(get("/users/{id}", USER_ID).header("Accept-Language", "ru"))
+        mockMvc.perform(get("/users/{id}", USER_ID).header("Accept-Language", "ru").with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("1001"))
                 .andExpect(jsonPath("$.message").value(errorMessage))
@@ -167,7 +171,7 @@ class UserResourceTest {
     }
 
     @Test
-    void newPostTest() throws Exception {
+    void createPostTest() throws Exception {
         String message = "Hello world";
 
         PostDTO post = PostDTO.builder()
@@ -190,6 +194,7 @@ class UserResourceTest {
         when(postRepository.save(any())).thenReturn(savedPost);
 
         mockMvc.perform(post("/users/{userId}/posts", USER_ID)
+                        .with(user("testUser").password("testUserPassword"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(post))
                 )
@@ -212,6 +217,7 @@ class UserResourceTest {
         String errorMessage = String.format("User with id = %s not found", USER_ID);
 
         mockMvc.perform(post("/users/{userId}/posts", USER_ID)
+                        .with(user("testUser").password("testUserPassword"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(post))
                 )
@@ -223,7 +229,7 @@ class UserResourceTest {
 
     @Test
     void deleteUserTest() throws Exception {
-        mockMvc.perform(delete("/users/{userId}", USER_ID))
+        mockMvc.perform(delete("/users/{userId}", USER_ID).with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isNoContent());
         verify(userRepository, times(1)).deleteById(USER_ID);
     }
@@ -247,7 +253,8 @@ class UserResourceTest {
                 .build();
 
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.of(post));
-        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID)
+                        .with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(POST_ID))
                 .andExpect(jsonPath("$.message").value(message))
@@ -260,7 +267,8 @@ class UserResourceTest {
 
         String errorMessage = String.format("Post with id = %s for user with id = %s not found", POST_ID, USER_ID);
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
-        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID)
+                        .with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("1002"))
                 .andExpect(jsonPath("$.message").value(errorMessage))
@@ -277,6 +285,7 @@ class UserResourceTest {
         String errorMessage = String.format("Сообщение c id = %s для пользователя с Id = %s не найденно", POST_ID, USER_ID);
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenReturn(Optional.empty());
         mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID)
+                        .with(user("testUser").password("testUserPassword"))
                         .header("Accept-Language", "ru")
                         .header("content-type", "application/json", "charset=utf-8")
                 )
@@ -293,7 +302,7 @@ class UserResourceTest {
     void unexpectedServerErrorTest() throws Exception {
 
         when(postRepository.findByIdAndUserId(POST_ID, USER_ID)).thenThrow(new RuntimeException("Unexpected Exception"));
-        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID))
+        mockMvc.perform(get("/users/{userId}/posts/{postId}", USER_ID, POST_ID).with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.errorCode").value("server.error"))
                 .andExpect(jsonPath("$.details", POST_ID).value(nullValue()))
@@ -318,7 +327,7 @@ class UserResourceTest {
         posts.add(secondPost);
 
         when(postRepository.findByUserId(USER_ID)).thenReturn(posts);
-        mockMvc.perform(get("/users/{userId}/posts", USER_ID))
+        mockMvc.perform(get("/users/{userId}/posts", USER_ID).with(user("testUser").password("testUserPassword")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", firstPost.getId(), firstPost.getMessage(), firstPost.getVersion()).exists())
                 .andExpect(jsonPath("$.[?(@['id']=='%s' && @['message']=='%s' && @['version']=='%s')]", secondPost.getId(), secondPost.getMessage(), secondPost.getVersion()).exists())
@@ -331,6 +340,7 @@ class UserResourceTest {
         UserDTO user = new UserDTO(null, null, tooShortName, DATE_OF_BIRTH);
 
         mockMvc.perform(post("/users")
+                        .with(user("testUser").password("testUserPassword"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user))
                 )

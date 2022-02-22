@@ -1,5 +1,6 @@
 package vea.home.microservice.controllers;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.exparity.hamcrest.date.LocalDateTimeMatchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import vea.home.microservice.entities.User;
 import vea.home.microservice.services.PostDTO;
 import vea.home.microservice.services.UserDTO;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -42,6 +47,7 @@ class ITUserResourceTest {
     void createUserTest() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBasicAuth("testUser", "testUserPassword");
 
         UserDTO user = UserDTO.builder()
                 .dateOfBirth(DATE_OF_BIRTH)
@@ -68,8 +74,10 @@ class ITUserResourceTest {
     @Test
     @Order(2)
     void fetchUserTest() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("testUser", "testUserPassword");
+        ResponseEntity<UserDTO> response = restTemplate.exchange(URI.create("http://localhost:" + port + "/users/" + userId), HttpMethod.GET, new HttpEntity<>(headers), UserDTO.class);
 
-        ResponseEntity<UserDTO> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/" + userId), UserDTO.class);
 
         assertThat(response, allOf(
                 hasProperty("statusCode", is(HttpStatus.OK)),
@@ -86,7 +94,10 @@ class ITUserResourceTest {
     @Order(3)
     void fetchAllUsersTest() {
 
-        ResponseEntity<UserDTO[]> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/"), UserDTO[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("testUser", "testUserPassword");
+        ResponseEntity<UserDTO[]> response = restTemplate.exchange(URI.create("http://localhost:" + port + "/users/"), HttpMethod.GET, new HttpEntity<>(headers), UserDTO[].class);
+
 
         assertThat(response, allOf(
                 hasProperty("statusCode", equalTo(HttpStatus.OK)),
@@ -109,7 +120,7 @@ class ITUserResourceTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
-
+        headers.setBasicAuth("testUser", "testUserPassword");
         PostDTO post = PostDTO.builder()
                 .message(MESSAGE)
                 .build();
@@ -135,7 +146,12 @@ class ITUserResourceTest {
     @Test
     @Order(5)
     void fetchPostTest() {
-        ResponseEntity<PostDTO> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/" + userId + "/posts/" + postId), PostDTO.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBasicAuth("testUser", "testUserPassword");
+
+        ResponseEntity<PostDTO> response = restTemplate.exchange(URI.create("http://localhost:" + port + "/users/" + userId + "/posts/" + postId), HttpMethod.GET, new HttpEntity<>(headers), PostDTO.class);
+
         assertThat(response, allOf(
                 hasProperty("statusCode", is(HttpStatus.OK)),
                 hasProperty("body", allOf(
@@ -150,7 +166,12 @@ class ITUserResourceTest {
     @Test
     @Order(6)
     void fetchAllPostTest() {
-        ResponseEntity<PostDTO[]> response = restTemplate.getForEntity(URI.create("http://localhost:" + port + "/users/" + userId + "/posts/"), PostDTO[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBasicAuth("testUser", "testUserPassword");
+
+        ResponseEntity<PostDTO[]> response = restTemplate.exchange(URI.create("http://localhost:" + port + "/users/" + userId + "/posts/"), HttpMethod.GET, new HttpEntity<>(headers), PostDTO[].class);
+
         assertThat(response, allOf(
                 hasProperty("statusCode", is(HttpStatus.OK)),
                 hasProperty("body", allOf(
@@ -170,7 +191,7 @@ class ITUserResourceTest {
     void deleteUserTest() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
-
+        headers.setBasicAuth("testUser", "testUserPassword");
 
         HttpEntity<Object> request = new HttpEntity<>(null, headers);
         ResponseEntity<Object> response = restTemplate.exchange(URI.create("http://localhost:" + port + "/users/" + userId), HttpMethod.DELETE, request, Object.class);
